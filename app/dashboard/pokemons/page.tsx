@@ -1,5 +1,4 @@
-import { PokemonGrid, PokemonsResponse, SimplePokemon } from "@/app/pokemons";
-import Image from "next/image";
+import { PokemonGrid, PokemonsResponse, SimplePokemon } from "@/pokemons";
 
 const getPokemons = async (limit = 20, offset = 0): Promise<SimplePokemon[]> => {
   const data: PokemonsResponse = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=${limit}&offset=${offset}`)
@@ -8,7 +7,10 @@ const getPokemons = async (limit = 20, offset = 0): Promise<SimplePokemon[]> => 
   const pokemons = data.results.map(pokemon => ({
     id: pokemon.url.split('/').at(-2)!,
     name: pokemon.name,
-  }))
+  }));
+
+  // se maneja en el error.tsx
+  // throw new Error('Error en el servidor')
 
   return pokemons;
 }
