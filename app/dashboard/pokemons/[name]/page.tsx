@@ -1,33 +1,35 @@
-import { Pokemon } from '@/pokemons';
+import { Pokemon, PokemonsResponse } from '@/pokemons';
 import { Metadata } from 'next';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 
 interface Props {
     params: Promise<{
-        id: string;
+        name: string;
     }>;
 }
 
-// se ejecuta en el build time (npm run build)
-// va a crear en el build de produccion las páginas de pokemons
 export async function generateStaticParams() {
-    const static151Pokemons = Array.from({ length: 151 }).map((v, i) => `${ i + 1 }`);
+    const data: PokemonsResponse = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=151`)
+        .then(res => res.json());
 
-    return static151Pokemons.map(id => ({ id }));
-    // return [
-    //     { id: 1 },
-    // ];
+        const static151Pokemons = data.results.map(pokemon => ({
+        name: pokemon.name,
+    }));
+
+    return static151Pokemons.map(({ name }) => (
+        { name }
+    ));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
     try {
-        const id = (await params).id;
-        const { id: pokemonId, name } = await getPokemon(id);
+        const name = (await params).name;
+        const { id, name: pokemonName } = await getPokemon(name);
 
         return {
-            title: `#${pokemonId} - ${name}`,
-            description: `Página del pokemon ${name}`,
+            title: `#${id} - ${pokemonName}`,
+            description: `Página del pokemon ${pokemonName}`,
         };
     } catch (error) {
         return {
@@ -38,11 +40,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 }
 
-const getPokemon = async (id: string): Promise<Pokemon> => {
+const getPokemon = async (name: string): Promise<Pokemon> => {
 
     try {
-        const pokemon = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`, {
-            // cache: 'force-cache', //cuando se vuelva a llamar el request con los mismos argumentos, se obtendrá la respuesta de cache de Nextjs
+        const pokemon = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`, {
             next: {
                 revalidate: 60 * 60 * 30 * 6 // para revalidar el cache cada 6 meses, incluyendo las páginas not found
             }
@@ -57,8 +58,8 @@ const getPokemon = async (id: string): Promise<Pokemon> => {
 
 export default async function PokemonPage({ params }: Props) {
 
-    const id = (await params).id;
-    const pokemon = await getPokemon(id);
+    const name = (await params).name;
+    const pokemon = await getPokemon(name);
 
     return (
         <div className="flex mt-5 flex-col items-center text-slate-800">

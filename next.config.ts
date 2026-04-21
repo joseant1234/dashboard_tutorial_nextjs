@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  cacheComponents: true,
   images: {
     remotePatterns: [
       {
@@ -12,7 +13,7 @@ const nextConfig: NextConfig = {
         hostname: 'raw.githubusercontent.com',
       },
     ]
-  }
+  },
 };
 
 export default nextConfig;
