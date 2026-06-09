@@ -1,18 +1,21 @@
 import { PokemonGrid, PokemonsResponse, SimplePokemon } from "@/pokemons";
 import { cacheLife, cacheTag, revalidateTag } from "next/cache";
 
-
 export const metadata = {
- title: '151 Pokemons',
- description: 'Pokemons',
+  title: "151 Pokemons",
+  description: "Pokemons",
 };
 
-const getPokemons = async (limit = 20, offset = 0): Promise<SimplePokemon[]> => {
-  const data: PokemonsResponse = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=${limit}&offset=${offset}`)
-    .then(res => res.json());
+const getPokemons = async (
+  limit = 20,
+  offset = 0,
+): Promise<SimplePokemon[]> => {
+  const data: PokemonsResponse = await fetch(
+    `https://pokeapi.co/api/v2/pokemon?limit=${limit}&offset=${offset}`,
+  ).then((res) => res.json());
 
-  const pokemons = data.results.map(pokemon => ({
-    id: pokemon.url.split('/').at(-2)!,
+  const pokemons = data.results.map((pokemon) => ({
+    id: pokemon.url.split("/").at(-2)!,
     name: pokemon.name,
   }));
 
@@ -20,19 +23,23 @@ const getPokemons = async (limit = 20, offset = 0): Promise<SimplePokemon[]> => 
   // throw new Error('Error en el servidor')
 
   return pokemons;
-}
+};
 
 // next maneja esto para el cliente como si fuera sincrono
 export default async function PokemonsPage() {
-  'use cache';
+  "use cache";
+
+  // se puede poner un alias para que en otra parte de la aplicacion se use la fn revalidateTag('pokemons') para enviar la revalidacion
+  // cacheTag("pokemons");
 
   const pokemons = await getPokemons(151);
 
   return (
     <div className="flex flex-col">
-      <span className="text-5xl my-2">Listado de Pokémons <small className="text-blue-500">estático</small></span>
-      <PokemonGrid pokemons={ pokemons } />
-
+      <span className="text-5xl my-2">
+        Listado de Pokémons <small className="text-blue-500">estático</small>
+      </span>
+      <PokemonGrid pokemons={pokemons} />
     </div>
   );
 }
